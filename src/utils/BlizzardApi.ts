@@ -1,27 +1,27 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getBlizzardAccessToken } from '@src/utils/auth';
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosResponse, Method } from 'axios';
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
-    const { guildName } = req.query;
+//TODO: process.env remove to correct way
+//TODO: better status handle like 401 or 404
 
+export const BizzardAPI = async (method: Method = 'GET', endpoint: string, data?: Request): Promise<Response> => {
     try {
-        const response: AxiosResponse = await axios.get(
-            `https://us.api.blizzard.com/data/wow/guild/area-52/${guildName}/roster?region=us&namespace=profile-us`,
-            {
-                headers: {
-                    Authorization: `Bearer ${(await getBlizzardAccessToken()).token}`,
-                },
-            }
-        );
+        const response = await axios({
+            method,
+            url: process.env.BLIZZARD_API_HOST + endpoint,
+            data: data,
+            headers: {
+                Authorization: `Bearer ${(await getBlizzardAccessToken()).token}`,
+            },
+        });
 
         if (response.status !== 200) {
-            throw new Error(`Failed to fetch. Status: ${response.status}, ${response.statusText}`);
+            throw new Error(`Failed to fetch ${endpoint} Status: ${response.status}, ${response.statusText}`);
         }
 
-        res.json(response.data);
+        return response.data as any;
     } catch (error: any) {
-        console.error('Error fetching', error.message);
-        throw error;
+        throw new Error(`Blizzard Api failed because ${error.response.status} ${error.response.statusText}`);
     }
 };

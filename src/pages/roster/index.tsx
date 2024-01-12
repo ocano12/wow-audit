@@ -11,7 +11,7 @@ export interface RosterPageProps {
     members: Member[];
 }
 
-export const getRoster = (members: Member[], playableClasses: Class[]) => {
+export const getRoster = (members: Member[] = [], playableClasses: Class[] = []) => {
     return members.map((member: Member) => {
         const playableClass = playableClasses.find(
             (playableClass) => playableClass.id === member.character.playable_class.id
@@ -37,15 +37,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         `${process.env.CLIENT_DOMAIN}/api/roster/getMembers?guildName=${guildName}`
     );
 
-    const playableClasses: Class[] = (
-        await axios.get('https://us.api.blizzard.com/data/wow/playable-class/index?namespace=static-10.2.0_51825-us', {
-            headers: {
-                Authorization: `Bearer ${(await getBlizzardAccessToken()).token}`,
-            },
-        })
-    ).data.classes;
+    const getPlayableClassResponse: AxiosResponse = await axios.get(
+        `${process.env.CLIENT_DOMAIN}/api/playable-class/playable-class?guildName=${guildName}`
+    );
 
-    const roster = getRoster(getMembersResponse.data.members, playableClasses);
+    const roster = getRoster(getMembersResponse.data.members, getPlayableClassResponse.data.classes);
 
     return {
         props: {
@@ -58,8 +54,8 @@ const RosterPage = ({ members }: RosterPageProps) => {
     return (
         <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
             <div className='mx-auto max-w-3xl'>
-                {members.map((member: Member) => (
-                    <div>
+                {members.map((member: Member, index: number) => (
+                    <div key={index}>
                         <span>{member.character.name}</span>
                         <span>{member.character.playable_class.name}</span>
                     </div>

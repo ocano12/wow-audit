@@ -1,9 +1,9 @@
 import React from 'react';
 import axios, { AxiosResponse } from 'axios';
 import { GetServerSideProps } from 'next';
-import { getBlizzardAccessToken } from '@src/utils/auth';
 import { Member } from '@src/types/roster/member';
 import { Class } from '@src/types/class';
+import { getClassFromID } from '@src/utils/getClassFromId';
 
 //TODO: in the future the guild name needs to come from the context object being passed down through nextjs.
 //TODO: convert all process.env to correct nextjs way to use env
@@ -54,12 +54,19 @@ const RosterPage = ({ members }: RosterPageProps) => {
     return (
         <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
             <div className='mx-auto max-w-3xl'>
-                {members.map((member: Member, index: number) => (
-                    <div key={index}>
-                        <span>{member.character.name}</span>
-                        <span>{member.character.playable_class.name}</span>
-                    </div>
-                ))}
+                {members.map((member: Member, index: number) => {
+                    const className = getClassFromID(member.character.playable_class.id);
+                    return (
+                        <div key={index} className='flex items-center p-3'>
+                            <img
+                                src={`/assets/classicon_${className}.jpg`}
+                                alt={`${className} icon`}
+                                className='w-8 h-8 mr-2'
+                            />
+                            <span className={`flex-1 ${className}`}>{member.character.name}</span>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );

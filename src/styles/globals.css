@@ -3,19 +3,58 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+    --foreground-rgb: 0, 0, 0;
+    --background-start-rgb: 214, 219, 220;
+    --background-end-rgb: 255, 255, 255;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+    :root {
+        --foreground-rgb: 255, 255, 255;
+        --background-start-rgb: 0, 0, 0;
+        --background-end-rgb: 0, 0, 0;
+    }
 }
 
 body {
+}
 
+.deathknight {
+    color: #c41f3b;
+}
+.demonhunter {
+    color: #a330c9;
+}
+.druid {
+    color: #ff7d0a;
+}
+.evoker {
+    color: #33937f;
+}
+.hunter {
+    color: #abd473;
+}
+.mage {
+    color: #69ccf0;
+}
+.monk {
+    color: #00ff96;
+}
+.paladin {
+    color: #f58cba;
+}
+.priest {
+    color: white;
+}
+.rogue {
+    color: #fff569;
+}
+.shaman {
+    color: #0070de;
+}
+.warlock {
+    color: #9482c9;
+}
+.warrior {
+    color: #c79c6e;
 }

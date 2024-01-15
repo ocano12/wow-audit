@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import axios, { AxiosResponse } from 'axios';
 import { GetServerSideProps } from 'next';
 import { Member } from '@src/types/roster/member';
 import { Class } from '@src/types/class';
 import { getClassFromID } from '@src/utils/getClassFromId';
 import { Container } from '@components/Container';
+import { RoleTable } from '@components/RoleTable';
+import { RosterCard } from '@components/RosterCard/';
 
 //TODO: in the future the guild name needs to come from the context object being passed down through nextjs.
 //TODO: convert all process.env to correct nextjs way to use env
+//TODO: check db to see if a roster is already set. if not call blizzard api. if it is fill in the roster slots
 export interface RosterPageProps {
     members: Member[];
 }
@@ -24,7 +27,7 @@ export const getRoster = (members: Member[] = [], playableClasses: Class[] = [])
                 ...member.character,
                 playable_class: {
                     ...member.character.playable_class,
-                    name: playableClass?.name?.en_US ?? 'Unknown', // Set a default value if playableClass is not found
+                    name: playableClass?.name?.en_US ?? 'Unknown',
                 },
             },
         };
@@ -52,92 +55,75 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 };
 
 const RosterPage = ({ members }: RosterPageProps) => {
+    const [tanks, setTanks] = useState<Member[]>([]);
+    const [healers, setHealers] = useState<Member[]>([]);
+
+    const handleTanks = (member: Member) => {
+        setTanks([...tanks, member]);
+    };
+    const handleHealer = (member: Member) => {
+        setHealers([...healers, member]);
+    };
+    const checkIfMemberSelected = (member: Member): boolean => {
+        return [...tanks, ...healers].some((selectedMember) => selectedMember.character.id === member.character.id);
+    };
+
+    const handleUnSelectMember = (memberToRemove: Member) => {
+        const updatedTanks = tanks.filter((member) => member.character.id !== memberToRemove.character.id);
+        const updatedHealers = healers.filter((member) => member.character.id !== memberToRemove.character.id);
+
+        setTanks(updatedTanks);
+        setHealers(updatedHealers);
+    };
+
     return (
         <Container>
             <div className='flex flex-direction-row p-5'>
                 <div className='w-1/5'>
-                    {members.map((member: Member, index: number) => {
-                        const className = getClassFromID(member.character.playable_class.id);
-                        return (
-                            <div key={index} className='flex items-center p-3'>
-                                <img
-                                    src={`/assets/classicon_${className}.jpg`}
-                                    alt={`${className} icon`}
-                                    className='w-7 h-7 rounded mr-2 border'
-                                />
-                                <span className={`flex-1  ${className}`}>{member.character.name}</span>
-                            </div>
-                        );
-                    })}
+                    <div className='rounded' style={{ backgroundColor: '#374963' }}>
+                        <p className='text-3xl text-white p-3'>Roster</p>
+                        {members.map((member: Member, index: number) => {
+                            return (
+                                // TODO: make this drag and drop so theres no buttons
+                                <RosterCard member={member} index={index} selected={checkIfMemberSelected(member)}>
+                                    <div>
+                                        <button
+                                            onClick={() => handleTanks(member)}
+                                            className='text-white border'
+                                            disabled={checkIfMemberSelected(member)}
+                                        >
+                                            Tanks
+                                        </button>
+                                        <button
+                                            onClick={() => handleHealer(member)}
+                                            className='text-white border'
+                                            disabled={checkIfMemberSelected(member)}
+                                        >
+                                            Healer
+                                        </button>
+                                    </div>
+                                </RosterCard>
+                            );
+                        })}
+                    </div>
                 </div>
                 <div className='w-4/5'>
-                    <div className='flex flex-direction-row'>
-                        <div className='w-1/2'>
-                            {' '}
-                            <div className='bg-gray-500'>
-                                <div className='flex flex-col'>
-                                    <div className='bg-gray-500 p-2'>
-                                        <h2 className='text-white text-xl font-bold'>Tanks</h2>
-                                    </div>
-                                    {/* TODO: makes this to every tank put into the tank array same thing with the other 4 divs. */}
-                                    <div className='bg-gray-400 p-2'>
-                                        <p className='text-gray-800'>Tank Name 1</p>
-                                    </div>
-                                    <div className='bg-gray-500 p-2'>
-                                        <p className='text-white'>Tank Name 2</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className='w-1/2'>
-                            <div className='bg-gray-500'>
-                                <div className='flex flex-col'>
-                                    <div className='bg-gray-500 p-2'>
-                                        <h2 className='text-white text-xl font-bold'>Heals</h2>
-                                    </div>
-                                    <div className='bg-gray-400 p-2'>
-                                        <p className='text-gray-800'>Tank Name 1</p>
-                                    </div>
-                                    <div className='bg-gray-500 p-2'>
-                                        <p className='text-white'>Tank Name 2</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div className='tanks-heals flex justify-around '>
+                        <RoleTable
+                            title='Tanks'
+                            imgUrl='/assets/classicon_paladin.jpg'
+                            slots={tanks}
+                            onClose={handleUnSelectMember}
+                        />
+                        <RoleTable
+                            title='Healers'
+                            imgUrl='/assets/classicon_priest.jpg'
+                            slots={healers}
+                            onClose={handleUnSelectMember}
+                        />
                     </div>
-                    <div className='flex flex-direction-row'>
-                        <div className='w-1/2'>
-                            {' '}
-                            <div className='bg-gray-500'>
-                                <div className='flex flex-col'>
-                                    <div className='bg-gray-500 p-2'>
-                                        <h2 className='text-white text-xl font-bold'>Melee</h2>
-                                    </div>
-                                    <div className='bg-gray-400 p-2'>
-                                        <p className='text-gray-800'>Tank Name 1</p>
-                                    </div>
-                                    <div className='bg-gray-500 p-2'>
-                                        <p className='text-white'>Tank Name 2</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className='w-1/2'>
-                            <div className='bg-gray-500'>
-                                <div className='flex flex-col'>
-                                    <div className='bg-gray-500 p-2'>
-                                        <h2 className='text-white text-xl font-bold'>Range</h2>
-                                    </div>
-                                    <div className='bg-gray-400 p-2'>
-                                        <p className='text-gray-800'>Tank Name 1</p>
-                                    </div>
-                                    <div className='bg-gray-500 p-2'>
-                                        <p className='text-white'>Tank Name 2</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <div className='melee-range flex'></div>
+                    <div className='subs flex'></div>
                 </div>
             </div>
         </Container>

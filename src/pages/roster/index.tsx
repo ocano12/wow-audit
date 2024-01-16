@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import axios, { AxiosResponse } from 'axios';
 import { GetServerSideProps } from 'next';
 import { Member } from '@src/types/roster/member';
@@ -58,23 +58,35 @@ const RosterPage = ({ members }: RosterPageProps) => {
     const [tanks, setTanks] = useState<Member[]>([]);
     const [healers, setHealers] = useState<Member[]>([]);
 
+    //TODO: usecall back for these function do a test to see how many renders before and after!
     const handleTanks = (member: Member) => {
-        setTanks([...tanks, member]);
+        if (tanks.length < 2) {
+            setTanks([...tanks, member]);
+        } else {
+            alert('Max Tanks have been selected!');
+        }
     };
     const handleHealer = (member: Member) => {
-        setHealers([...healers, member]);
+        if (healers.length < 4) {
+            setHealers([...healers, member]);
+        } else {
+            alert('Max Healers have been selected');
+        }
     };
     const checkIfMemberSelected = (member: Member): boolean => {
         return [...tanks, ...healers].some((selectedMember) => selectedMember.character.id === member.character.id);
     };
 
-    const handleUnSelectMember = (memberToRemove: Member) => {
-        const updatedTanks = tanks.filter((member) => member.character.id !== memberToRemove.character.id);
-        const updatedHealers = healers.filter((member) => member.character.id !== memberToRemove.character.id);
+    const handleUnSelectMember = useCallback(
+        (memberToRemove: Member) => {
+            const updatedTanks = tanks.filter((member) => member.character.id !== memberToRemove.character.id);
+            const updatedHealers = healers.filter((member) => member.character.id !== memberToRemove.character.id);
 
-        setTanks(updatedTanks);
-        setHealers(updatedHealers);
-    };
+            setTanks(updatedTanks);
+            setHealers(updatedHealers);
+        },
+        [tanks, healers]
+    );
 
     return (
         <Container>
@@ -85,45 +97,89 @@ const RosterPage = ({ members }: RosterPageProps) => {
                         {members.map((member: Member, index: number) => {
                             return (
                                 // TODO: make this drag and drop so theres no buttons
-                                <RosterCard member={member} index={index} selected={checkIfMemberSelected(member)}>
-                                    <div>
-                                        <button
-                                            onClick={() => handleTanks(member)}
-                                            className='text-white border'
-                                            disabled={checkIfMemberSelected(member)}
-                                        >
-                                            Tanks
-                                        </button>
-                                        <button
-                                            onClick={() => handleHealer(member)}
-                                            className='text-white border'
-                                            disabled={checkIfMemberSelected(member)}
-                                        >
-                                            Healer
-                                        </button>
-                                    </div>
-                                </RosterCard>
+                                <div
+                                    key={index}
+                                    className={`m-3 ${
+                                        index % 2 === 0 ? 'bg-gray-800 rounded ' : 'bg-gray-600 rounded'
+                                    }`}
+                                >
+                                    <RosterCard member={member} index={index} selected={checkIfMemberSelected(member)}>
+                                        <div>
+                                            <button
+                                                onClick={() => handleTanks(member)}
+                                                className='text-white border'
+                                                disabled={checkIfMemberSelected(member)}
+                                            >
+                                                Tanks
+                                            </button>
+                                            <button
+                                                onClick={() => handleHealer(member)}
+                                                className='text-white border'
+                                                disabled={checkIfMemberSelected(member)}
+                                            >
+                                                Healer
+                                            </button>
+                                        </div>
+                                    </RosterCard>
+                                </div>
                             );
                         })}
                     </div>
                 </div>
-                <div className='w-4/5'>
+                <div className='w-3/5'>
                     <div className='tanks-heals flex justify-around '>
                         <RoleTable
                             title='Tanks'
                             imgUrl='/assets/classicon_paladin.jpg'
-                            slots={tanks}
+                            slots={2}
+                            members={tanks}
                             onClose={handleUnSelectMember}
                         />
                         <RoleTable
                             title='Healers'
                             imgUrl='/assets/classicon_priest.jpg'
-                            slots={healers}
+                            slots={4}
+                            members={healers}
                             onClose={handleUnSelectMember}
                         />
                     </div>
                     <div className='melee-range flex'></div>
                     <div className='subs flex'></div>
+                </div>
+                <div className='w-1/5'>
+                    <div className=' bg-white shadow-xl flex-grow rounded'>
+                        <div className='w-11/12 mx-auto'>
+                            <div className='bg-white my-6'>
+                                <table className='text-left w-full border-collapse'>
+                                    <thead>
+                                        <tr>
+                                            <th className='py-4 px-6 bg-purple-400 font-bold uppercase text-sm text-white border-b border-grey-light'>
+                                                Composition
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr className='hover:bg-grey-lighter'>
+                                            <td className='py-2 px-3 border-b border-grey-light'>Bible</td>
+                                            <td className='py-2 px-3 text-center border-b border-grey-light'>11980</td>
+                                        </tr>
+                                        <tr className='hover:bg-grey-lighter'>
+                                            <td className='py-2 px-3 border-b border-grey-light'>Blah</td>
+                                            <td className='py-2 px-3 text-center border-b border-grey-light'>340</td>
+                                        </tr>
+                                        <tr className='hover:bg-grey-lighter'>
+                                            <td className='py-2 px-3 border-b border-grey-light'>Blah</td>
+                                            <td className='py-2 px-3 text-center border-b border-grey-light'>901</td>
+                                        </tr>
+                                        <tr className='hover:bg-grey-lighter'>
+                                            <td className='py-2 px-3 border-b border-grey-light'>Blah</td>
+                                            <td className='py-2 px-3 text-center border-b border-grey-light'>11950</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </Container>

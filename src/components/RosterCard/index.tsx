@@ -15,7 +15,7 @@ export const RosterCard = ({ member, index = 1, children, selected = false }: Ro
         <div>
             <div
                 key={index}
-                className={`flex items-center p-3 m-3 ${index % 2 === 0 ? 'bg-gray-800 rounded ' : ''}`}
+                className={`flex items-center p-3 m-3`}
                 style={selected ? { opacity: 0.5, pointerEvents: 'none' } : {}}
             >
                 <img

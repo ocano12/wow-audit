@@ -1,19 +1,32 @@
-import { dynamoDB } from '../config/aws';
 import { PutItemCommand } from '@aws-sdk/client-dynamodb';
+import { dynamoDB } from '../config/aws';
 
-export async function put(table: string, data: any) {
+interface ApiResponse {
+    success: boolean;
+    message?: string;
+    data?: any;
+}
+
+export const put = async (table: string, data: any): Promise<ApiResponse> => {
     try {
         const response = await dynamoDB.send(
             new PutItemCommand({
-                TableName: table, // replace with your DynamoDB table name
+                TableName: table,
                 Item: {
                     id: { S: '123' }, // replace with the actual user ID
                     data: { S: data },
                 },
             })
         );
+
         console.log('Item added successfully:', response);
-    } catch (error) {
-        console.error('Error adding item to DynamoDB:', error);
+
+        return {
+            success: true,
+            message: 'Item added successfully',
+            data: response, // Include any additional data you want to send back
+        };
+    } catch (error: any) {
+        throw new Error(`Error adding item to DynamoDB:${error.message}`);
     }
-}
+};

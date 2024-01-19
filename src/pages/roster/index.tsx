@@ -6,6 +6,7 @@ import { Class } from '@src/types/class';
 import { Container } from '@components/Container';
 import { RoleTable } from '@components/RoleTable';
 import { RosterCard } from '@components/RosterCard/';
+import { Roster } from '@src/types/roster/roster';
 
 //TODO: in the future the guild name needs to come from the context object being passed down through nextjs.
 //TODO: convert all process.env to correct nextjs way to use env
@@ -87,13 +88,15 @@ const RosterPage = ({ members }: RosterPageProps) => {
         [tanks, healers]
     );
 
-    const handleSave = async (roster: any) => {
+    const handleSave = async (roster: Roster) => {
         try {
-            await axios.post(`/api/roster/saveRoster`, {
+            const repsonse = await axios.post(`/api/roster/saveRoster`, {
                 roster: JSON.stringify(roster),
             });
+            alert(JSON.stringify(repsonse));
         } catch (error) {
             console.log('fucked');
+            alert('Not saved');
         }
     };
 

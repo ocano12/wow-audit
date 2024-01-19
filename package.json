@@ -11,7 +11,9 @@
         "build-storybook": "storybook build"
     },
     "dependencies": {
+        "@aws-sdk/client-dynamodb": "^3.495.0",
         "@dnd-kit/core": "^6.1.0",
+        "aws-sdk": "^2.1539.0",
         "axios": "^1.6.5",
         "cookie": "^0.6.0",
         "luxon": "^3.4.4",

@@ -19,7 +19,7 @@ export const RoleTable = (props: RoleTableProps) => {
     };
 
     const tableRows = [...Array(slots)];
-    console.log(tableRows);
+
     return (
         <div className='w-1/4 roundedflex-grow'>
             <div className='p-2' style={{ backgroundColor: '#374963 ' }}>

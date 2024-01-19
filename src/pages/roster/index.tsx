@@ -3,7 +3,6 @@ import axios, { AxiosResponse } from 'axios';
 import { GetServerSideProps } from 'next';
 import { Member } from '@src/types/roster/member';
 import { Class } from '@src/types/class';
-import { getClassFromID } from '@src/utils/getClassFromId';
 import { Container } from '@components/Container';
 import { RoleTable } from '@components/RoleTable';
 import { RosterCard } from '@components/RosterCard/';
@@ -88,6 +87,16 @@ const RosterPage = ({ members }: RosterPageProps) => {
         [tanks, healers]
     );
 
+    const handleSave = async (roster: any) => {
+        try {
+            await axios.post(`/api/roster/saveRoster`, {
+                roster: JSON.stringify(roster),
+            });
+        } catch (error) {
+            console.log('fucked');
+        }
+    };
+
     return (
         <Container>
             <div className='flex flex-direction-row p-5'>
@@ -127,6 +136,7 @@ const RosterPage = ({ members }: RosterPageProps) => {
                     </div>
                 </div>
                 <div className='w-3/5'>
+                    <button onClick={() => handleSave({ tanks: tanks, healers: healers })}>Save</button>
                     <div className='tanks-heals flex justify-around '>
                         <RoleTable
                             title='Tanks'

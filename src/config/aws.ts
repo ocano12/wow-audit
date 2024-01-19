@@ -1,5 +1,6 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 
+console.log(process.env.AWS_SECRET);
 const dynamoDB = new DynamoDBClient({
     region: process.env.AWS_REGION,
     credentials: {
